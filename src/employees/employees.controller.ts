@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -26,8 +26,14 @@ export class EmployeesController {
   }
 
   @Get(':id') //Parámetro dinámico. Un placeholder después de "employees" que será interpetado como id
-  findOne(@Param('id') id: string) {
-    return this.employeesService.findOne(+id); //el "+" indica que se tomará como "number" y no stirng.
+  //Param sirve para acceder a algun lado de la URL. En este caso quiere acceder al que llamamos "id" según el get de arriba
+  findOne(@Param('id',new ParseUUIDPipe({version: '4'})) id: string) {
+    /**
+     * El segundo parámetro de @Param es una instancia de una pipe. Al 2° es donde siempre se pasan los 
+     * valores antes que nada. Si todo jala, ya se pone como parámetro de función id:string. 
+     * Si no, NestJS devuelve 400 Bad Request automáticamente y tu método nunca se ejecuta.
+     */
+    return this.employeesService.findOne(id); 
   }
 
     /**
@@ -37,12 +43,12 @@ export class EmployeesController {
    * el mismo declarado en CreateEmployeeDto (es decir, un solo atributo, no todo el cuerpo). 
    */
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
-    return this.employeesService.update(+id, updateEmployeeDto);
+  update(@Param('id',new ParseUUIDPipe({version: '4'})) id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
+    return this.employeesService.update(id, updateEmployeeDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.employeesService.remove(+id);
+  remove(@Param('id',new ParseUUIDPipe({version: '4'})) id: string) {
+    return this.employeesService.remove(id);
   }
 }
