@@ -5,17 +5,20 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 @Injectable()
 export class EmployeesService {
 
-  private readonly employees = [{
+  private employees: CreateEmployeeDto[]= [{
+    id: 1,
     name: "Alberto",
     lastName: "Costas",
     phoneNumber: "122345455"
   },{
+    id: 2,
     name: "José",
     lastName: "Pérez",
     phoneNumber: "234565654"
   }]
 
   create(createEmployeeDto: CreateEmployeeDto) {
+    createEmployeeDto.id = this.employees.length+1;
     this.employees.push(createEmployeeDto);
     return createEmployeeDto;
   }
@@ -25,14 +28,32 @@ export class EmployeesService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} employee`;
+    const employee = this.employees.filter((employee) => {
+      return employee.id === id; 
+    })[0] //El 0 hace que agarre el elemento y ya no esté envuelto por corchetes
+    //Sería lo mismo que: const employee = this.employees.filter(employee => employee.id === id) 
+    return employee;
   }
 
-  update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
-    return `This action updates a #${id} employee`;
+  update(id: number, updateEmployeeDto: UpdateEmployeeDto) { 
+    let employeeToUpdate = this.findOne(id);
+    employeeToUpdate = {
+      ...employeeToUpdate,
+      ...updateEmployeeDto
+    }
+    this.employees = this.employees.map((employee)=>{
+      if(employee.id === id){
+        employee = employeeToUpdate
+      }
+      return employee;
+    });
+    return employeeToUpdate;
   }
 
   remove(id: number) {
-    return `This action removes a #${id} employee`;
+    this.employees = this.employees.filter((employee)=>{
+      return employee.id !== id;
+    }); //reescribe el arreglo con todos menos los que tienen el id que mandamos
+    return this.employees;
   }
 }
