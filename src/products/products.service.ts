@@ -32,7 +32,7 @@ export class ProductsService {
   ]
 
   create(createProductDto: CreateProductDto) {
-    createProductDto.productId = uuid();
+    if(!createProductDto.productId) createProductDto.productId = uuid();
     this.products.push(createProductDto);
     return "Product has been added successfully"
   }
@@ -78,8 +78,8 @@ export class ProductsService {
   }
 
   remove(id: string) {
-    this.findOne(id); //solo verifica que no lance excepción
-    this.products = this.products.filter(product => product.productId !== id)
+    const {productId} = this.findOne(id); //obtiene un atributo del objeto
+    this.products = this.products.filter(product => product.productId !== productId)
     return this.products;
   }
 }
