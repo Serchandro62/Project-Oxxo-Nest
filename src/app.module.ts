@@ -7,10 +7,12 @@ import { ProductsModule } from './products/products.module';
 import { ConfigModule } from '@nestjs/config'; //Carga variables de entorno desde un archivo .env o directamente del entorno del sistema.
 
 @Module({
-  imports: [TypeOrmModule.forRoot({ //se encarga de configurar la conexión global a la base de datos de TypeORM para toda tu aplicación.
+  imports: [
+    ConfigModule.forRoot({isGlobal: true}), // así no tienes que importarlo en cada módulo
+    TypeOrmModule.forRoot({ //se encarga de configurar la conexión global a la base de datos de TypeORM para toda tu aplicación.
     type: 'postgres',
     host: process.env.host,
-    port: Number(process.env.port), //Con "!" le aseguramos que no será nulo 
+    port: Number(process.env.port),
     username: 'postgres',
     password: process.env.pass,
     database: process.env.name,

@@ -1,11 +1,14 @@
 import { IsInt, IsNumber, isNumber, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 
 export class CreateProductDto {
+    /**
+     * Los decoradores de class-validator solo funcionan una vez que se ejecuta el programa (runtime)
+     * La verificación de campos (por ejemeplo el "?") de typescript solo funciona en compialcion (no runtime)
+     */
+
     @IsUUID("4") //Queremos que sea un UUID tipo 4
-    @IsOptional() //En caso de que no lo traiga, igual lo estamos poniendo en la función
-    @IsString()
-    
-    productId: string;
+    @IsOptional()
+    productId?: string; 
 
     @IsString()
     @MaxLength(40) //40 caracteres
@@ -18,5 +21,6 @@ export class CreateProductDto {
     countSeal: number;
 
     @IsUUID()
-    provider: string;
+    @IsOptional() //le dice a class-validator que ignore las validaciones si el campo no está presente o es undefined
+    provider?: string; //Esto le dice a TS que el tipo realmente es "string | undefined"
 }
