@@ -22,28 +22,7 @@ export class ProductsService {
    */
   constructor(@InjectRepository(Product) private productRepository: Repository<Product>) { }
 
-
-  private products: CreateProductDto[] = [
-    {
-      productId: uuid(),
-      productName: "Sabritas Normal 48g",
-      price: 29,
-      countSeal: 3,
-      provider: uuid()
-    }, {
-      productId: uuid(),
-      productName: "Coca Cola 600ml",
-      price: 40,
-      countSeal: 2,
-      provider: uuid()
-    }, {
-      productId: uuid(),
-      productName: "Agua Ciel 1L",
-      price: 15,
-      countSeal: 2,
-      provider: uuid()
-    }
-  ]
+  //recuerda que el "await" desenvuelve el valor de su promesa
 
   async create(createProductDto: CreateProductDto) {
     // const product = this.productRepository.create(createProductDto); //crea instancia new Product() porque el puro createProductDto puede tener varias propiedades faltantes ya que son @IsOptional
@@ -58,51 +37,52 @@ export class ProductsService {
     return await this.productRepository.save(createProductDto);
     // TypeORM automáticamente llama a create() internamente
     //el método save() de un objeto de tipo Repository<> devuelve automáticamente lo que guardó. Por eso lo podíamos guardar en una variable
+    //Lo que devuelve es de tipo Promise<Product>
   }
 
-  findAll() {
-    return this.productRepository.find();
+  async findAll() {
+    return await this.productRepository.find();
+    //Lo que devuelve es de tipo Promise<Product[]>
   }
 
-  findOne(id: string) {
-    const product = this.products.find(product => product.productId === id);
-    if (!product) throw new NotFoundException();
+  async findOne(id: string) {
+    const product = await this.productRepository.findOneBy({
+      productId: id
+    });
+    //Lo que devuelve es de tipo Promise<Product | null>
+    if(!product) throw new NotFoundException();
     return product;
   }
 
   findByProvider(id: string) {
 
-    const providerProducts = this.products
-      .filter(product => product.provider === id) // devuelve createProductDto[]
-      .map(product => product.productName); //al arreglo de productos que tenemos, les saca su productName
-
-    return providerProducts;
   }
 
-  update(id: string, updateProductDto: UpdateProductDto) {
-    let productToUpdate = this.findOne(id);
-    //let productToUpdate = this.products.find(product => product.productId === id); 
+  async update(id: string, updateProductDto: UpdateProductDto) {
     /**
-     * podríamos hacer esto, pero entonces TS no tendría seguro si se encontró un producto o no, y marcará
-     * error en el spread de abajo. Pero si usamos la función findOne, ya se maneja un error en caso de que sea 
-     * vacío.
+     * Busca en la base de datos la entidad con el ID proporcionado
+     * Carga todos los campos de la entidad existente
+     * Reemplaza los campos con los valores del objeto plano
+     * Retorna la entidad modificada pero NO guardada
      */
-    productToUpdate = {
-      ...productToUpdate,
+    const productToUpdate = await this.productRepository.preload({
+      productId: id,
       ...updateProductDto
-    }
-    this.products = this.products.map((product) => {
-      if (product.productId === id) {
-        product = productToUpdate;
-      }
-      return product;
-    });
+    })
+    if(!productToUpdate) throw new NotFoundException();
+    await this.productRepository.save(productToUpdate);
     return productToUpdate;
   }
 
-  remove(id: string) {
-    const { productId } = this.findOne(id); //obtiene un atributo del objeto
-    this.products = this.products.filter(product => product.productId !== productId)
-    return this.products;
+  async remove(id: string) {
+    const result = await this.productRepository.delete({
+      productId: id
+    });
+    //Lo que devuelve es de tipo Promise<DeleteResult>, porque una vez eliminado, el registro no debería existir en tu aplicación
+    //afected es un atirbuto que dice cuántos eliminó
+    if (result.affected === 0) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+    return { message: `Product with ID ${id} deleted successfully` };
   }
 }
