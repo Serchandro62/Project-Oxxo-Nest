@@ -2,6 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import {v4 as uuid} from "uuid";
+import { InjectRepository } from '@nestjs/typeorm';
+import { Employee } from './entities/employee.entity';
+import { Repository } from 'typeorm';
 /**
  * Sirve para generar cadenas largas que muy poco probablemente (pero posiblemente) generen un 
  * string igual 2 veces a lo largo del tiempo de vida de un software. Si generaras 1,000 millones de 
@@ -11,57 +14,41 @@ import {v4 as uuid} from "uuid";
 @Injectable()
 export class EmployeesService {
 
-  private employees: CreateEmployeeDto[]= [{
-    id:uuid(),
-    name: "Alberto",
-    lastName: "Costas",
-    phoneNumber: "122345455"
-  },{
-    id: uuid(),
-    name: "José",
-    lastName: "Pérez",
-    phoneNumber: "234565654"
-  }]
+  constructor(@InjectRepository(Employee) private employeeRepository: Repository<Employee>){}
 
-  create(createEmployeeDto: CreateEmployeeDto) {
-    createEmployeeDto.id = uuid();
-    this.employees.push(createEmployeeDto);
-    return createEmployeeDto;
+  async create(createEmployeeDto: CreateEmployeeDto) {
+    return await this.employeeRepository.save(createEmployeeDto);
   }
 
-  findAll() {
-    return this.employees; //Esto retorna todos los empleados que tengamos al momento de ser llamado
+  async findAll() {
+    return await this.employeeRepository.find();
   }
 
-  findOne(id: string) {
-    const employee = this.employees.filter((employee) => {
-      return employee.id === id; 
-    })[0] //El 0 hace que agarre el elemento y ya no esté envuelto por corchetes
-    //Sería lo mismo que: const employee = this.employees.filter(employee => employee.id === id) 
+  async findOne(id: string) {
+    const employee = await this.employeeRepository.findOneBy({
+      employeeId: id
+    });
     if(!employee) throw new NotFoundException();
     return employee;
   }
 
-  update(id: string, updateEmployeeDto: UpdateEmployeeDto) { 
-    let employeeToUpdate = this.findOne(id);
-    employeeToUpdate = {
-      ...employeeToUpdate,
+  async update(id: string, updateEmployeeDto: UpdateEmployeeDto) { //O sea, por más "patch" que sea, de todas formas terminamos buscando el registro original por su ID para cambiarlo todo de golpe como en un PUT
+    const employeeToUpdate = await this.employeeRepository.preload({
+      employeeId: id,
       ...updateEmployeeDto
-    }
-    this.employees = this.employees.map((employee)=>{
-      if(employee.id === id){
-        employee = employeeToUpdate
-      }
-      return employee;
-    });
+    })
+    if(!employeeToUpdate) throw new NotFoundException();
+    await this.employeeRepository.save(employeeToUpdate);
     return employeeToUpdate;
   }
 
-  remove(id: string) {
-    this.findOne(id) //Solo verifica que no mande error. Es decir, que exista
-    this.employees = this.employees.filter((employee)=>{
-      return employee.id !== id;
-    }); //reescribe el arreglo con todos menos los que coinciden con el id
-    return this.employees;
+  async remove(id: string) {
+    const result = await this.employeeRepository.delete({
+      employeeId: id
+    });
+    if(result.affected === 0){
+      throw new NotFoundException(`Employee with ID ${id} not found`);
+    } 
+    return {message: `Employee with ID ${id} deleted successfully`};
   }
 }
