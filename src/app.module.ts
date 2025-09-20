@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { EmployeesModule } from './employees/employees.module';
 import { ProductsModule } from './products/products.module';
 import { ConfigModule } from '@nestjs/config'; //Permite leer variables de entorno .env y proporciona el servicio ConfigService (que provee valores por defecto, tipados, etc)
+import { ProvidersModule } from './providers/providers.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { ConfigModule } from '@nestjs/config'; //Permite leer variables de entor
     synchronize: true,
   }),
     EmployeesModule,
-    ProductsModule
+    ProductsModule,
+    ProvidersModule
   ],
   controllers: [AppController],
   providers: [AppService],

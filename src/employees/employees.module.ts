@@ -10,7 +10,7 @@ import { Employee } from './entities/employee.entity';
    * Permite usar @InjectRepository(Employee) en los servicios del módulo
    * Configura la conexión con la tabla de productos en la base de datos
    */
-  imports: [TypeOrmModule.forFeature([Employee])],
+  imports: [TypeOrmModule.forFeature([Employee])], //Basicamente mete un repositorio del tipo indicado al contenedor para ser inyectado en el servicio. 
   controllers: [EmployeesController],
   providers: [EmployeesService],
 })

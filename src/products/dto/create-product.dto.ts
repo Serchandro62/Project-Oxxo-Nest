@@ -3,7 +3,8 @@ import { IsInt, IsNumber, isNumber, IsOptional, IsString, IsUUID, MaxLength } fr
 export class CreateProductDto {
     /**
      * Los decoradores de class-validator solo funcionan una vez que se ejecuta el programa (runtime)
-     * La verificación de campos (por ejemeplo el "?") de typescript solo funciona en compialcion (no runtime)
+     * La verificación de TIPOS de campos (por ejemeplo el "?") de typescript solo funciona en compialcion (no runtime).
+     * Que la verificación de los campos mismos (no sus tipos) es en ambos. 
      */
 
     @IsUUID("4") //Queremos que sea un UUID tipo 4

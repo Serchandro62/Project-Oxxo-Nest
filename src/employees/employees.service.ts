@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
 import { Repository } from 'typeorm';
 /**
- * Sirve para generar cadenas largas que muy poco probablemente (pero posiblemente) generen un 
+ * uuid sirve para generar cadenas largas que muy poco probablemente (pero posiblemente) generen un 
  * string igual 2 veces a lo largo del tiempo de vida de un software. Si generaras 1,000 millones de 
  * UUIDs por segundo, tardarías más que la edad del universo en tener una colisión “probable”.
  */
