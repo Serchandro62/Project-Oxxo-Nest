@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProviderDto } from './dto/create-provider.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,19 +14,52 @@ export class ProvidersService {
     return await this.providerRepository.save(createProviderDto);
   }
 
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
   async findAll() {
     return await this.providerRepository.find();
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} provider`;
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  async findOne(id: string) {
+    const provider =  await this.providerRepository.findOneBy({
+      providerId: id
+    }) 
+    if(!provider) throw new NotFoundException()
+    return provider;
   }
 
-  update(id: string, updateProviderDto: UpdateProviderDto) {
-    return `This action updates a #${id} provider`;
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  async findByName(name: string) {
+    const provider =  await this.providerRepository.findOneBy({
+      providerName: name
+    }) 
+    if(!provider) throw new NotFoundException()
+    return provider;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} provider`;
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  async update(id: string, updateProviderDto: UpdateProviderDto) {
+    const providerToUpdate = await this.providerRepository.preload({
+      providerId: id,
+      ...updateProviderDto
+    });
+    if(!providerToUpdate) throw new NotFoundException()
+    return await this.providerRepository.save(providerToUpdate);
+  }
+
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  async remove(id: string) {
+    const removed = await this.providerRepository.delete({
+      providerId: id
+    });
+    if(removed.affected==0){
+      throw new NotFoundException
+    }
+    return `The provider with ID ${id} has been successfully deleted`;
   }
 }

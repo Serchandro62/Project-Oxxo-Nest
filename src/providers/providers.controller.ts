@@ -22,6 +22,11 @@ export class ProvidersController {
     return this.providersService.findOne(id);
   }
 
+  @Get('/name/:name')
+  findByName(@Param('name') name: string){
+    return this.providersService.findByName(name);
+  }
+
   @Patch(':id')
   update(@Param('id', new ParseUUIDPipe({version: '4'})) id: string, @Body() updateProviderDto: UpdateProviderDto) {
     return this.providersService.update(id, updateProviderDto);

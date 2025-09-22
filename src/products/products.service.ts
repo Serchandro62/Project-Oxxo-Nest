@@ -52,7 +52,13 @@ export class ProductsService {
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  findByProvider(id: string) {
+  async findByProvider(id: string) {
+    //Busca un producto que, en su atributo "provider", tenga un objeto cuyo atributo "providerId" sea el id buscado
+    return await this.productRepository.findBy({ 
+      provider: {
+        providerId: id
+      }
+    })
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
