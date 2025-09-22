@@ -18,15 +18,15 @@ export class ProvidersService {
     return await this.providerRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} provider`;
   }
 
-  update(id: number, updateProviderDto: UpdateProviderDto) {
+  update(id: string, updateProviderDto: UpdateProviderDto) {
     return `This action updates a #${id} provider`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} provider`;
   }
 }

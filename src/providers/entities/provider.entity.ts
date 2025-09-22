@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Product } from "src/products/entities/product.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Provider {
@@ -12,5 +13,12 @@ export class Provider {
     providerEmail: string;
     
     @Column({type: "text", nullable: true})
-    providerPhoneNumber: string;
+    providerPhoneNumber: string
+
+     /**
+     * La primera función devuelve la entidad con la que tendremos la relación.
+     * La segunda función devuelve qué atributo de esa entidad es la que apunta de vuelta para acá. 
+     */
+    @OneToMany(()=>Product, (product)=>product.provider)
+    products: Product[] //Es un arreglo porque esta entidad tendrá mucha de las otras. 
 }

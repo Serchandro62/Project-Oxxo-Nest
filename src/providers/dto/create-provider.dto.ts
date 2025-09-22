@@ -1,11 +1,10 @@
-import { IsEmail, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsEmail, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 import { Provider } from "../entities/provider.entity";
 
 export class CreateProviderDto {
-    /*
-    * providerId: string;  Este no lo vamos a validar ni incluir en el molde porque no estaremos
-    * esperando un id en la petición POST
-    */
+    @IsUUID("4")
+    @IsOptional()
+    providerId?: string; 
 
     @IsString()
     @MaxLength(100)

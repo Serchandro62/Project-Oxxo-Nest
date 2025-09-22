@@ -33,6 +33,10 @@ export class EmployeesService {
   }
 
   async update(id: string, updateEmployeeDto: UpdateEmployeeDto) { //O sea, por más "patch" que sea, de todas formas terminamos buscando el registro original por su ID para cambiarlo todo de golpe como en un PUT
+    /**
+     * El preload lo que hace es BUSCAR el id en la DB, y no busca más. Siempre buscar un id, que acá abajo debe venir con el mismo nombre que le dimos al @PrimaryGeneratedColumn
+     * en la entity. No crea un objeto nuevo completamente, sino que tiene que verificar que la PK indicada sí exista en la DB, y a ese objeto que obtiene, modificarlo. 
+     */
     const employeeToUpdate = await this.employeeRepository.preload({
       employeeId: id,
       ...updateEmployeeDto

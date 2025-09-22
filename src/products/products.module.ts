@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
+import { Provider } from 'src/providers/entities/provider.entity';
 
 @Module({
   /**
@@ -10,7 +11,7 @@ import { Product } from './entities/product.entity';
    * Permite usar @InjectRepository(Product) en los servicios del módulo
    * Configura la conexión con la tabla de productos en la base de datos
    */
-  imports: [TypeOrmModule.forFeature([Product])],
+  imports: [TypeOrmModule.forFeature([Product,Provider])],
   
   controllers: [ProductsController],
   providers: [ProductsService],

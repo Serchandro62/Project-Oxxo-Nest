@@ -1,85 +1,89 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { v4 as uuid } from 'uuid';
-import { NotFoundError } from 'rxjs';
-import { Employee } from 'src/employees/entities/employee.entity';
-import { prependListener } from 'process';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
+import { Provider } from 'src/providers/entities/provider.entity';
 
 @Injectable()
 export class ProductsService {
 
-  /**
-   * constructor(...) - Define el constructor de la clase
-   * @InjectRepository(Product) - Decorador de NestJS que:
-   * Indica que se debe inyectar un repositorio de TypeORM
-   * Product especifica la entidad para la cual se crea el repositorio
-   * private productRepository - Declara una propiedad privada llamada productRepository
-   * Repository<Product> - Tipo TypeScript que indica que es un repositorio para la entidad Product
-   */
-  constructor(@InjectRepository(Product) private productRepository: Repository<Product>) { }
+  constructor(
+    @InjectRepository(Product) private productRepository: Repository<Product>,
+    @InjectRepository(Provider) private providerRepository: Repository<Provider>) { }
+  //Tuvimos que añadir un repositorio para providers para poder hacer la relación manualmente. Ya lo importamos en el module igual
 
-  //recuerda que el "await" desenvuelve el valor de su promesa
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   async create(createProductDto: CreateProductDto) {
-    // const product = this.productRepository.create(createProductDto); //crea instancia new Product() porque el puro createProductDto puede tener varias propiedades faltantes ya que son @IsOptional
-    // const savedProduct = await this.productRepository.save(product); // ahora si lo aguardamos ya completo. 
-    // return savedProduct; // ← Retorna lo que persistió la BD que, a diferencia de "product", sí tiene: 
-    /**
-     * Con ID: Incluye el ID autoincremental generado por la base de datos
-     * Datos completos: Trae todos los valores default, timestamps, etc.
-     * Confirmación: Sabes que realmente se guardó exitosamente
-     */
-    ///////////////////////////////////////////////////////Pero lo podemos resumir así: 
-    return await this.productRepository.save(createProductDto);
-    // TypeORM automáticamente llama a create() internamente
-    //el método save() de un objeto de tipo Repository<> devuelve automáticamente lo que guardó. Por eso lo podíamos guardar en una variable
-    //Lo que devuelve es de tipo Promise<Product>
+    const providerToLink = await this.providerRepository.findOneBy({
+      providerId: createProductDto.providerId
+    });
+    if (!providerToLink) throw new NotFoundException(`Provider with ID ${createProductDto.providerId} not found`);
+    const productToSave = {
+      ...createProductDto,
+      provider: providerToLink
+    };
+    return await this.productRepository.save(productToSave);
   }
 
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * Se tiene que indicar, si la tabla tuviera muchas más relaciones, todas ellas en ese arreglo "relations".
+   * Tiene que ser con el nombre con el que declaramos el campo en la entity
+   */
   async findAll() {
-    return await this.productRepository.find();
-    //Lo que devuelve es de tipo Promise<Product[]>
+    return await this.productRepository.find({
+      relations: ['provider']  // ← ¡Esto carga la relación!
+    });
   }
+
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   async findOne(id: string) {
     const product = await this.productRepository.findOneBy({
       productId: id
     });
-    //Lo que devuelve es de tipo Promise<Product | null>
-    if(!product) throw new NotFoundException();
+    if (!product) throw new NotFoundException();
     return product;
   }
 
-  findByProvider(id: string) {
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+  findByProvider(id: string) {
   }
 
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
   async update(id: string, updateProductDto: UpdateProductDto) {
-    /**
-     * Busca en la base de datos la entidad con el ID proporcionado
-     * Carga todos los campos de la entidad existente
-     * Reemplaza los campos con los valores del objeto plano
-     * Retorna la entidad modificada pero NO guardada
-     */
     const productToUpdate = await this.productRepository.preload({
       productId: id,
       ...updateProductDto
-    })
-    if(!productToUpdate) throw new NotFoundException();
+    });
+    if (!productToUpdate) throw new NotFoundException(`Product with ID ${id} not found`);
+    //DIferencia con otros update////////
+    if (updateProductDto.providerId) { //Si lo que queremos modificar tiene un providerId, encontramos el nuevo proveedor y lo metemos a lo que guardaremos
+      const providerToLink = await this.providerRepository.findOneBy({
+        providerId: updateProductDto.providerId
+      });
+      if (!providerToLink) {
+        throw new NotFoundException(`Provider with ID ${updateProductDto.providerId} not found`);
+      }
+      productToUpdate.provider = providerToLink;
+    }
+    ///////////////////////////////////
     await this.productRepository.save(productToUpdate);
     return productToUpdate;
   }
+
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   async remove(id: string) {
     const result = await this.productRepository.delete({
       productId: id
     });
-    //Lo que devuelve es de tipo Promise<DeleteResult>, porque una vez eliminado, el registro no debería existir en tu aplicación
-    //afected es un atirbuto que dice cuántos eliminó
     if (result.affected === 0) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
