@@ -1,54 +1,79 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 @Controller('employees')
 export class EmployeesController {
-  constructor(private readonly employeesService: EmployeesService) {}
+  constructor(private readonly employeesService: EmployeesService) { }
 
   /**
-   * Es importante notar que, aunque la petición no venga con el formato correcto de CreateEmployeeDto
-   * sí será procesada. A diferencia de Java, el chequeo de tipos en TS solo se hace durante desarrollo
-   * y acba una vez que entramos a RunTime, en donde ya fue transpilado a JS (no hay tipos).
-   * Dado que la petición se hace en RunTime, el tipado no tiene utilidad en ese momento. Sin validadores
-   * adicionales, no hay control.
+   * @UseInterceptors--> Aplica uno o más interceptores a un controlador o método específico.
+   * Nota: Existen formatos de petición HTTP alternos al JSON, como los "multipart/form-data" (Formato para enviar archivos y datos juntos en una petición)
+   * 'request' es un objeto global de Express que contiene TODA la información de una petición
+   * 'request.file' es una propiedad que Multer (una librería que maneja archivos) añade al request
+   * FileInterceptor('file') --> En el body de un "multipart/form-data", busca el campo llamado 'file' (en este caso) y se lo pasa a Multer para que lo guarde en request.file
+   * @UploadedFile--> Busca en request.file lo guardado. En este caso lo guardará en una variable que tiene el tipo que Multer le da a los archivos. 
    */
+
+  /**FileInterceptor(
+  fieldName: string, 
+  options: MulterOptions // ← dest va aquí
+  ) 
+  Esta es la estructura de FilteInterceptor. El segundo parámetro es un arreglo de instrucciones para Multer*/
+
+  /**
+   * Estructura de Express.Multer.File:
+   * {
+   *   fieldname: 'file',           // Nombre del campo en el formulario
+   *   originalname: 'imagen.png',  // Nombre original del archivo
+   *   encoding: '7bit',            // Codificación
+   *   mimetype: 'image/png',       // Tipo MIME
+   *   buffer: <Buffer ...>,        // Contenido del archivo en bytes
+   *   size: 1024                   // Tamaño en bytes
+   * }
+   */
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file',{
+    dest: "./src/employees/employees-photos"
+  }))
+  uploadPhoto(@UploadedFile() file: Express.Multer.File) {
+    return "Ok";
+  }
+
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   @Post()
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeesService.create(createEmployeeDto);
   }
 
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
   @Get()
   findAll() {
     return this.employeesService.findAll();
   }
 
-  @Get(':id') //Parámetro dinámico. Un placeholder después de "employees" que será interpetado como id
-  //Param sirve para acceder a algun lado de la URL. En este caso quiere acceder al que llamamos "id" según el get de arriba
-  findOne(@Param('id',new ParseUUIDPipe({version: '4'})) id: string) {
-    /**
-     * El segundo parámetro de @Param es una instancia de una pipe. Al 2° es donde siempre se pasan los 
-     * valores antes que nada. Si todo jala, ya se pone como parámetro de función id:string. 
-     * Si no, NestJS devuelve 400 Bad Request automáticamente y tu método nunca se ejecuta.
-     */
-    return this.employeesService.findOne(id); 
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  @Get(':id')
+  findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.employeesService.findOne(id);
   }
 
-    /**
-   * Anteriormente dije que, dado que se transpila a JS en runtime, no había problemas con 
-   * el formato de las peticiones. Pero pensemos a futuro, cuando haya classValidators y demás. Pensando
-   * en eso, usamos UpdateEmployeeDto, para que en un patch, podamos mandar un cuerpo que no es exactamente
-   * el mismo declarado en CreateEmployeeDto (es decir, un solo atributo, no todo el cuerpo). 
-   */
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
   @Patch(':id')
-  update(@Param('id',new ParseUUIDPipe({version: '4'})) id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
+  update(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
     return this.employeesService.update(id, updateEmployeeDto);
   }
 
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
   @Delete(':id')
-  remove(@Param('id',new ParseUUIDPipe({version: '4'})) id: string) {
+  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.employeesService.remove(id);
   }
 }

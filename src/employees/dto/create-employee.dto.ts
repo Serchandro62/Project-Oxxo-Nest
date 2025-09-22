@@ -17,4 +17,6 @@ export class CreateEmployeeDto {
     @MaxLength(10)
     @IsString()
     phoneNumber: string;
+
+    
 }
