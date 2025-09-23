@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Location } from "src/locations/entities/location.entity";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Manager {
@@ -12,5 +13,11 @@ export class Manager {
     managerEmail: string;
     @Column('text')
     managerPhoneNumber: string;
-    //Relación con location
+    /**
+     * TypeORM no puede saber por sí solo en cuál de las dos tablas crearla. Por esta razón, requiere 
+     * que tú especifiques explícitamente dónde quieres la columna FK usando el decorador @JoinColumn(). 
+     * Si no lo usas, TypeORM no sabe qué columna crear y dónde.
+     */
+    @OneToOne(()=>Location, (location)=>location.manager) 
+    location: Location
 }

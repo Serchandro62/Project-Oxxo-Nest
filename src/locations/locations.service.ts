@@ -22,7 +22,7 @@ export class LocationsService {
     const location = await this.locationRepository.findOneBy({
       locationId: id
     })
-    if(!location) throw new NotFoundException
+    if (!location) throw new NotFoundException
     return location;
   }
 
@@ -31,7 +31,7 @@ export class LocationsService {
       locationId: id,
       ...updateLocationDto
     })
-    if(!locationToUpdate) throw new NotFoundException
+    if (!locationToUpdate) throw new NotFoundException
     return await this.locationRepository.save(locationToUpdate);
   }
 
@@ -39,7 +39,7 @@ export class LocationsService {
     const locationRemoved = await this.locationRepository.delete({
       locationId: id
     })
-    if(locationRemoved.affected == 0) throw new NotFoundException
+    if (locationRemoved.affected == 0) throw new NotFoundException
     return `Location with ID ${id} deleted successfully!`;
   }
 }
