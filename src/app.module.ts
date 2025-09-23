@@ -6,6 +6,9 @@ import { EmployeesModule } from './employees/employees.module';
 import { ProductsModule } from './products/products.module';
 import { ConfigModule } from '@nestjs/config'; //Permite leer variables de entorno .env y proporciona el servicio ConfigService (que provee valores por defecto, tipados, etc)
 import { ProvidersModule } from './providers/providers.module';
+import { ManagersModule } from './managers/managers.module';
+import { LocationsModule } from './locations/locations.module';
+import { RegionsModule } from './regions/regions.module';
 
 @Module({
   imports: [
@@ -23,7 +26,10 @@ import { ProvidersModule } from './providers/providers.module';
   }),
     EmployeesModule,
     ProductsModule,
-    ProvidersModule
+    ProvidersModule,
+    ManagersModule,
+    LocationsModule,
+    RegionsModule
   ],
   controllers: [AppController],
   providers: [AppService],
