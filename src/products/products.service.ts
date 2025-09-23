@@ -80,8 +80,7 @@ export class ProductsService {
       productToUpdate.provider = providerToLink;
     }
     ///////////////////////////////////
-    await this.productRepository.save(productToUpdate);
-    return productToUpdate;
+    return await this.productRepository.save(productToUpdate);
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

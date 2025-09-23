@@ -39,8 +39,7 @@ export class EmployeesService {
       ...updateEmployeeDto
     })
     if(!employeeToUpdate) throw new NotFoundException();
-    await this.employeeRepository.save(employeeToUpdate);
-    return employeeToUpdate;
+    return await this.employeeRepository.save(employeeToUpdate);
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
