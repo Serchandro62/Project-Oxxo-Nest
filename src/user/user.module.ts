@@ -10,13 +10,17 @@ import { EXPIRES_IN, JWT_KEY } from './constants/jwt.constants';
   imports: [
     TypeOrmModule.forFeature([User]),
 
-    //Cada módulo que importa JwtModule.register() crea su PROPIA instancia de JwtService con su propia configuración.
-    //Al crear un JwtModule.register(), automáticamente se sube al contenedor, disponible para todo este módulo. 
-    JwtModule.register({ //configura el módulo de JWT (JSON Web Token) en tu aplicación NestJS.
-      secret: JWT_KEY, //establecemos la secret_key del jwt desde aquí. 
-      signOptions: { //Este objeto configura las opciones al momento de crear un token.
+    
+    JwtModule.register({ 
+      secret: JWT_KEY, 
+      signOptions: { 
         expiresIn: EXPIRES_IN
-      }
+      },
+      global: true 
+      /**
+       * Con esta nueva configuración, el módulo ya no solo se sube al contenedor de éste módulo, sino al global.
+       * Es decir, ahora, sin necesidad de importarlo y configurarlo en otros módulos, todos usarán este mismo. 
+       */
     })
 
 

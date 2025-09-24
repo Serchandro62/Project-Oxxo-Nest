@@ -14,7 +14,6 @@ export class UserService {
 
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    //inyectado desde el contenedor. Subido al contenedor desde user.module
     private jwtService: JwtService) { }
 
   //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,16 +41,11 @@ export class UserService {
     if (!user) throw new NotFoundException
     const match = await bcrypt.compare(LoginUserDto.userPassword, user.userPassword); 
     if (!match) throw new UnauthorizedException('Credenciales inválidas');
-    //si sí hubi match... 
-    const payload = { //creamos un objeto que tiene 2 datos de nuestro usuario
+    const payload = { 
       user: user.userEmail,
       password: user.userPassword
     }
-    return this.jwtService.sign(payload); //lo mandamos al payload del jwt. 
-    /**
-     * jwtService es una instancia de JwtService, que viene inyectado (comportamiento default JwtService) desde user.module, donde
-     * viene indicado qué "secret" usa y demás. Como es "injectable" por default, lo pudimos inyectar al constructor desde el contenedor. 
-     */
+    return this.jwtService.sign(payload);
   }
 
 }
