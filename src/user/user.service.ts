@@ -7,6 +7,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 import bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/login-user.dto';
+import { userInfo } from 'os';
 
 
 @Injectable()
@@ -34,16 +35,17 @@ export class UserService {
 
   //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  async loginUser(LoginUserDto: LoginUserDto) {
+  async loginUser(loginUserDto: LoginUserDto) {
     const user = await this.userRepository.findOneBy({
-      userEmail: LoginUserDto.userEmail
+      userEmail: loginUserDto.userEmail
     })
     if (!user) throw new NotFoundException
-    const match = await bcrypt.compare(LoginUserDto.userPassword, user.userPassword); 
+    const match = await bcrypt.compare(loginUserDto.userPassword, user.userPassword); 
     if (!match) throw new UnauthorizedException('Credenciales inválidas');
     const payload = { 
-      user: user.userEmail,
-      password: user.userPassword
+      userEmail: user.userEmail,
+      userPassword: user.userPassword,
+      userRoles: user.userRoles
     }
     return this.jwtService.sign(payload);
   }
