@@ -5,13 +5,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { QueryFailedError, Repository } from 'typeorm';
 import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
+import { LoginUserDto } from './dto/login-user.dto';
 
 
 @Injectable()
 export class UserService {
 
-  constructor(@InjectRepository(User) private userRepository: Repository<User>) { }
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
+    //inyectado desde el contenedor. Subido al contenedor desde user.module
+    private jwtService: JwtService) { }
 
   //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -31,32 +35,22 @@ export class UserService {
 
   //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  async loginUser(createUserDto: CreateUserDto) {
+  async loginUser(LoginUserDto: LoginUserDto) {
     const user = await this.userRepository.findOneBy({
-      userEmail: createUserDto.userEmail
+      userEmail: LoginUserDto.userEmail
     })
     if (!user) throw new NotFoundException
-    const match = await bcrypt.compare(createUserDto.userPassword, user.userPassword); 
-    if (!match) throw new UnauthorizedException('No estás autorizado');
-    return jwt.sign(JSON.stringify(user),"SECRET KEY"); //Si todo salió bien le damos su token
-    //el primer parámetro tiene que ser un JSON, no un objeto. Por eso lo convertimos. 
-
+    const match = await bcrypt.compare(LoginUserDto.userPassword, user.userPassword); 
+    if (!match) throw new UnauthorizedException('Credenciales inválidas');
+    //si sí hubi match... 
+    const payload = { //creamos un objeto que tiene 2 datos de nuestro usuario
+      user: user.userEmail,
+      password: user.userPassword
+    }
+    return this.jwtService.sign(payload); //lo mandamos al payload del jwt. 
     /**
-    * JWT No es por seguridad, solo es para validar que ningún contenido se ha modificado. Si algo del cuerpo se modifica,
-    * entonces la signature ya no es correcta. 
-    */
-
-    /**
-     * entonces la generación de un jwt es:
-     * base64(header).base64(payload).base64(signature)
-     * donde signature es:
-     * hmacsha[x]
-     * donde x = mezcla de ((a + b), c) donde c es algo como la "salt" del hasheo, pero constante 
-     * donde a = base64(header)
-     * b = base64(payload)
-     * c = secret
-     * 
-     * Entonces cuando toca validarlo, tomas el "b64(header).b64(payload)", lo metes al hmacsha(AQUI,secret) y lo b64amos, y si sale igual, todo cuadra. 
+     * jwtService es una instancia de JwtService, que viene inyectado (comportamiento default JwtService) desde user.module, donde
+     * viene indicado qué "secret" usa y demás. Como es "injectable" por default, lo pudimos inyectar al constructor desde el contenedor. 
      */
   }
 
