@@ -1,0 +1,23 @@
+1.- Creamos varias entidades relacionadas con sus dto y sus entidades, sus controllers y sus servicios. 
+
+2.- Aprendimos que User solo es una entidad más, pero uno de sus campos (password) está hasheado. 
+    ---------Esto es autenticación---------
+
+3.- jwt solo es un grupo de datos codificados del usuario (payload) que se entrega al usuario, que tendrá que ingresar al usar ciertos endpoints.
+-->Equivalente: Te emito un pase a six flags
+
+3.1.- AuthGuard pide ese jwt ("pase") para ciertos endpoints, verifica que no haya sido modificado, y lo mete al ExecutionContext (que vive y muere por request)
+-->Equivalente: Veo que tu pase esté en buen estado antes de que entres a six flags
+
+4.- Aprendimos a crear paramDecorators, que simplemente sacan el valor del ExecutionContext, para ver si el jwt entregado sirve para hacer ciertas acciones
+-->Equivalente: Veo si es premium o no para ver si te puedes subir al juego. 
+    ---------Esto es autorización---------
+
+4.1.- ¿De qué sirve el jwt? No puedo hacer la parte de autorización sin él? 
+El jwt tiene las ventajas de que no necesita buscar en la DB por cada request, el backend no tiene que guardar sesiones en memoria. Básicamente es
+más por escalabilidad que por seguridad. De hecho es más seguro stateful, pero bueno. 
+
+5.- Aprendimos lo que es metadata, y que no todos los decoradores le mueven a eso. La clase Reflector tiene un método para crear decoradores que añaden metadata. 
+
+6.- Aprendimos a usar el @Roles() que creamos, para indicar con metadata qué role requiere un endpoint. 
+6.1.- RolesGuard lee la metadata, para ver qué rol requiere. Debe ir en algo que ya haya pasado por AuthGuard.

@@ -47,7 +47,7 @@ export class UserService {
       userPassword: user.userPassword,
       userRoles: user.userRoles
     }
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload); //haces login, te avienta un string token
   }
 
 }
