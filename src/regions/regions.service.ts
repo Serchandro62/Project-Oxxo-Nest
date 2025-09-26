@@ -1,17 +1,27 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateRegionDto } from './dto/create-region.dto';
 import { UpdateRegionDto } from './dto/update-region.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Region } from './entities/region.entity';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 
 @Injectable()
 export class RegionsService {
 
-  constructor(@InjectRepository(Region) private regionRepository: Repository<Region>){}
+  constructor(@InjectRepository(Region) private regionRepository: Repository<Region>) { }
 
   async create(createRegionDto: CreateRegionDto) {
-    return await this.regionRepository.save(createRegionDto);
+    try {
+      return await this.regionRepository.save(createRegionDto);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        if ((error as any).code === '23505') { // 23505 = unique_violation en Postgres
+          throw new ConflictException('Region with this name already exists');
+        }
+      }
+      console.log(error)
+      throw new InternalServerErrorException('User creation failed');
+    }
   }
 
   async findAll() {
@@ -22,7 +32,7 @@ export class RegionsService {
     const region = await this.regionRepository.findOneBy({
       regionId: id
     })
-    if(!region) throw new NotFoundException
+    if (!region) throw new NotFoundException
     return region;
   }
 
@@ -31,7 +41,7 @@ export class RegionsService {
       regionId: id,
       ...updateRegionDto
     })
-    if(!regionToUpdate) throw new NotFoundException
+    if (!regionToUpdate) throw new NotFoundException
     return await this.regionRepository.save(regionToUpdate);
   }
 
@@ -39,7 +49,7 @@ export class RegionsService {
     const removed = await this.regionRepository.delete({
       regionId: id
     })
-    if(removed.affected == 0) throw new NotFoundException
+    if (removed.affected == 0) throw new NotFoundException
     return `Region with ID ${id} has been deleted successfully!`;
   }
 }

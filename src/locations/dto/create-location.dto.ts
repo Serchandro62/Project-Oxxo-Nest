@@ -1,4 +1,4 @@
-import { IsLatLong, IsString, IsUUID, MaxLength } from "class-validator";
+import { IsLatLong, IsNumber, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 
 export class CreateLocationDto {
     @IsString()
@@ -11,4 +11,12 @@ export class CreateLocationDto {
 
     @IsLatLong()
     locationCoords: string;
+
+    @IsNumber()
+    @IsOptional()
+    regionId?: number;
+
+    @IsUUID()
+    @IsOptional()
+    managerId?:string;
 }

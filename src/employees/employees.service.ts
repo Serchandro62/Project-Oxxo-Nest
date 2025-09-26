@@ -1,10 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import {v4 as uuid} from "uuid";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { Location } from 'src/locations/entities/location.entity';
 import { User } from 'src/user/entities/user.entity';
 
@@ -14,33 +13,47 @@ export class EmployeesService {
   constructor(
     @InjectRepository(Employee) private employeeRepository: Repository<Employee>,
     @InjectRepository(Location) private locationRepository: Repository<Location>,
-    @InjectRepository(User) private userRepository: Repository<User>){}
+    @InjectRepository(User) private userRepository: Repository<User>) { }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   async create(createEmployeeDto: CreateEmployeeDto) {
-    const locationToLink = await this.locationRepository.findOneBy({
-      locationId: createEmployeeDto.locationId
-    });
-    const userToLink = await this.userRepository.findOneBy({
-      userId: createEmployeeDto.userId
-    });
-    if (!locationToLink) throw new NotFoundException(`Location with ID ${createEmployeeDto.locationId} not found`);
-    else if (!userToLink) throw new NotFoundException(`User with ID ${createEmployeeDto.userId} not found`);
+    let locationToLink;
+    let userToLink;
+    if(createEmployeeDto.locationId){
+      locationToLink = await this.locationRepository.findOneBy({
+        locationId: createEmployeeDto.locationId
+      });
+      if (!locationToLink) throw new NotFoundException(`Location with ID ${createEmployeeDto.locationId} not found`);
+    }
+    if(createEmployeeDto.userId){
+      userToLink = await this.userRepository.findOneBy({
+        userId: createEmployeeDto.userId
+      });
+      if (!userToLink) throw new NotFoundException(`User with ID ${createEmployeeDto.userId} not found`);
+    }
     const employeeToSave = {
       ...createEmployeeDto,
       location: locationToLink,
       user: userToLink
     };
-    return await this.employeeRepository.save(employeeToSave);
+    try {
+      return await this.employeeRepository.save(employeeToSave);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        if ((error as any).code === '23505') { // 23505 = unique_violation en Postgres
+          throw new ConflictException('Employee with this email already exists');
+        }
+      }
+      console.log(error)
+      throw new InternalServerErrorException('User creation failed');
+    }
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   async findAll() {
-    return await this.employeeRepository.find({
-      relations: ['user','location']  // ← ¡Esto carga la relación!
-    });
+    return await this.employeeRepository.find();
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,24 +62,40 @@ export class EmployeesService {
     const employee = await this.employeeRepository.findOneBy({
       employeeId: id
     });
-    if(!employee) throw new NotFoundException();
+    if (!employee) throw new NotFoundException();
     return employee;
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  findByLocation(locationId: number){
-    
+  async findByLocation(locationId: number) {
+    return await this.employeeRepository.findBy({
+      location: {
+        locationId: locationId
+      }
+    })
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  async update(id: string, updateEmployeeDto: UpdateEmployeeDto) { 
+  async update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
     const employeeToUpdate = await this.employeeRepository.preload({
       employeeId: id,
       ...updateEmployeeDto
     })
-    if(!employeeToUpdate) throw new NotFoundException();
+    if (!employeeToUpdate) throw new NotFoundException();
+    //==============================================
+    if(updateEmployeeDto.locationId){
+      const locationToUpdate = await this.locationRepository.findOneBy({locationId: updateEmployeeDto.locationId})
+      if(!locationToUpdate) throw new NotFoundException(`Location with ID ${updateEmployeeDto.locationId} not found`)
+      employeeToUpdate.location = locationToUpdate
+    }
+    if(updateEmployeeDto.userId){
+      const userToUpdate = await this.userRepository.findOneBy({userId: updateEmployeeDto.userId})
+      if(!userToUpdate) throw new NotFoundException(`User with ID ${updateEmployeeDto.userId} not found`)
+      employeeToUpdate.user = userToUpdate
+    }
+    //==============================================
     return await this.employeeRepository.save(employeeToUpdate);
   }
 
@@ -76,9 +105,9 @@ export class EmployeesService {
     const result = await this.employeeRepository.delete({
       employeeId: id
     });
-    if(result.affected === 0){
+    if (result.affected === 0) {
       throw new NotFoundException(`Employee with ID ${id} not found`);
-    } 
-    return {message: `Employee with ID ${id} deleted successfully`};
+    }
+    return { message: `Employee with ID ${id} deleted successfully` };
   }
 }

@@ -46,8 +46,8 @@ export class EmployeesController {
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   @Auth([ROLES.MANAGER])
-  @Get('/location/:locationId')
-  findByLocation(@Param ('locationId') locationId: string){
+  @Get('/location/:id')
+  findByLocation(@Param ('id') locationId: string){
     return this.employeesService.findByLocation(+locationId);
   }
 

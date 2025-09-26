@@ -8,16 +8,20 @@ import bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { userInfo } from 'os';
+import { Auth } from './decorators/auth.decorator';
 
 
 @Injectable()
 export class UserService {
-
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     private jwtService: JwtService) { }
 
   //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  async findAll() {
+    return await this.userRepository.find();
+  }
 
   async registerUser(createUserDto: CreateUserDto) {
     try {
@@ -40,9 +44,9 @@ export class UserService {
       userEmail: loginUserDto.userEmail
     })
     if (!user) throw new NotFoundException
-    const match = await bcrypt.compare(loginUserDto.userPassword, user.userPassword); 
+    const match = await bcrypt.compare(loginUserDto.userPassword, user.userPassword);
     if (!match) throw new UnauthorizedException('Credenciales inválidas');
-    const payload = { 
+    const payload = {
       userEmail: user.userEmail,
       userPassword: user.userPassword,
       userRoles: user.userRoles
@@ -52,13 +56,14 @@ export class UserService {
 
   //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  async update(userEmail: string, updateUserDto: UpdateUserDto){
-    const userToUpdate = await this.userRepository.preload({
-      userEmail: userEmail,
-      ...updateUserDto
-    })
-    if(!userToUpdate) throw new NotFoundException();
-    return await this.userRepository.save(userToUpdate);
+  async update(userEmail: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepository.findOne({ where: { userEmail } });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    const updatedUser = Object.assign(user, updateUserDto);
+    return await this.userRepository.save(updatedUser);
   }
 
 }
+

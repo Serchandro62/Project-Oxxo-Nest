@@ -16,17 +16,17 @@ export class Employee {
     @Column({type: "text"})
     employeePhoneNumber: string;
 
-    @Column({type:"text"})
+    @Column({type:"text", nullable: true})
     employeePhoto: string
     
     @Column({type: 'text', unique: true})
     employeeEmail: string;
 
-    @ManyToOne(()=>Location, (location)=>location.employees)
+    @ManyToOne(()=>Location, (location)=>location.employees, {eager: true})
     @JoinColumn({name: 'locationId'})
     location: Location; 
 
-    @OneToOne(()=>User,(user)=>user.employee)
+    @OneToOne(()=>User,(user)=>user.employee, {eager: true})
     @JoinColumn({name: 'userId'})
     user: User;
 }

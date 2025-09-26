@@ -11,18 +11,18 @@ export class Location {
     locationName: string;
     @Column('text')
     locationAddress: string;
-    @Column('text')
+    @Column('text',{unique: true})
     locationCoords: string;
     /**
      * TypeORM no puede saber por sí solo en cuál de las dos tablas crearla. Por esta razón, requiere 
      * que tú especifiques explícitamente dónde quieres la columna FK usando el decorador @JoinColumn(). 
      * Si no lo usas, TypeORM no sabe qué columna crear y dónde.
      */
-    @OneToOne(()=>Manager, (manager)=>manager.location)
+    @OneToOne(()=>Manager, (manager)=>manager.location,{eager:true})
     @JoinColumn({name: 'managerId'})
     manager: Manager;
 
-    @ManyToOne(()=>Region, (region)=>region.locations)
+    @ManyToOne(()=>Region, (region)=>region.locations,{eager:true})
     @JoinColumn({name: 'regionId'})
     region: Region;
 

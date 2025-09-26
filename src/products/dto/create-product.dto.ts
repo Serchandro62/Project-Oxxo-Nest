@@ -16,5 +16,6 @@ export class CreateProductDto {
     countSeal: number;
 
     @IsUUID()
-    providerId: string; 
+    @IsOptional()
+    providerId?: string; 
 }

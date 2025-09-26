@@ -17,10 +17,13 @@ export class ProductsService {
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   async create(createProductDto: CreateProductDto) {
-    const providerToLink = await this.providerRepository.findOneBy({
-      providerId: createProductDto.providerId
-    });
-    if (!providerToLink) throw new NotFoundException(`Provider with ID ${createProductDto.providerId} not found`);
+    let providerToLink;
+    if (createProductDto.providerId) {
+      providerToLink = await this.providerRepository.findOneBy({
+        providerId: createProductDto.providerId
+      });
+      if (!providerToLink) throw new NotFoundException(`Provider with ID ${createProductDto.providerId} not found`);
+    }
     const productToSave = {
       ...createProductDto,
       provider: providerToLink
