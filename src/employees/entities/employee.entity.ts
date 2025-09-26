@@ -6,14 +6,19 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn
 export class Employee {
     @PrimaryGeneratedColumn("uuid")
     employeeId: string;
+
     @Column({type: "text"})
     employeeName: string;
+
     @Column({type: "text"})
     employeeLastName: string;
+
     @Column({type: "text"})
     employeePhoneNumber: string;
+
     @Column({type:"text"})
     employeePhoto: string
+    
     @Column({type: 'text', unique: true})
     employeeEmail: string;
 
@@ -23,5 +28,5 @@ export class Employee {
 
     @OneToOne(()=>User,(user)=>user.employee)
     @JoinColumn({name: 'userId'})
-    user: User
+    user: User;
 }

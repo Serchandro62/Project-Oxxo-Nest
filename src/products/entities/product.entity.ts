@@ -5,7 +5,7 @@ export class Product {
     @PrimaryGeneratedColumn("uuid")
     productId: string;
 
-    @Column({type: "text"})
+    @Column({type: "text", unique: true})
     productName: string;
 
     @Column({type: "float"})
@@ -18,7 +18,7 @@ export class Product {
      * La primera función devuelve la entidad con la que tendremos la relación.
      * La segunda función devuelve qué atributo de esa entidad es la que apunta de vuelta para acá. 
      */
-    @ManyToOne(()=>Provider, (provider)=>provider.products)
+    @ManyToOne(()=>Provider, (provider)=>provider.products, { eager: true })
     @JoinColumn({name: "providerId"})
     /**
      * TypeORM automáticamente representará la relación con el proveedor

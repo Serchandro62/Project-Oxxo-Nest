@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { Provider } from 'src/providers/entities/provider.entity';
 
@@ -25,19 +25,22 @@ export class ProductsService {
       ...createProductDto,
       provider: providerToLink
     };
-    return await this.productRepository.save(productToSave);
+    try {
+      return await this.productRepository.save(productToSave);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        if ((error as any).code === '23505') { // 23505 = unique_violation en Postgres
+          throw new ConflictException('Product with this name already exists');
+        }
+      }
+      throw new InternalServerErrorException('User creation failed');
+    }
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * Se tiene que indicar, si la tabla tuviera muchas más relaciones, todas ellas en ese arreglo "relations".
-   * Tiene que ser con el nombre con el que declaramos el campo en la entity
-   */
   async findAll() {
-    return await this.productRepository.find({
-      relations: ['provider']  // ← ¡Esto carga la relación!
-    });
+    return await this.productRepository.find();
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -52,9 +55,9 @@ export class ProductsService {
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  async findByProvider(id: string) {
+  async findByProviderId(id: string) {
     //Busca un producto que, en su atributo "provider", tenga un objeto cuyo atributo "providerId" sea el id buscado
-    return await this.productRepository.findBy({ 
+    return await this.productRepository.findBy({
       provider: {
         providerId: id
       }

@@ -5,20 +5,42 @@ import {v4 as uuid} from "uuid";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
 import { Repository } from 'typeorm';
+import { Location } from 'src/locations/entities/location.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class EmployeesService {
 
-  constructor(@InjectRepository(Employee) private employeeRepository: Repository<Employee>){}
+  constructor(
+    @InjectRepository(Employee) private employeeRepository: Repository<Employee>,
+    @InjectRepository(Location) private locationRepository: Repository<Location>,
+    @InjectRepository(User) private userRepository: Repository<User>){}
+
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   async create(createEmployeeDto: CreateEmployeeDto) {
-    return await this.employeeRepository.save(createEmployeeDto);
+    const locationToLink = await this.locationRepository.findOneBy({
+      locationId: createEmployeeDto.locationId
+    });
+    const userToLink = await this.userRepository.findOneBy({
+      userId: createEmployeeDto.userId
+    });
+    if (!locationToLink) throw new NotFoundException(`Location with ID ${createEmployeeDto.locationId} not found`);
+    else if (!userToLink) throw new NotFoundException(`User with ID ${createEmployeeDto.userId} not found`);
+    const employeeToSave = {
+      ...createEmployeeDto,
+      location: locationToLink,
+      user: userToLink
+    };
+    return await this.employeeRepository.save(employeeToSave);
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   async findAll() {
-    return await this.employeeRepository.find();
+    return await this.employeeRepository.find({
+      relations: ['user','location']  // ← ¡Esto carga la relación!
+    });
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,6 +51,12 @@ export class EmployeesService {
     });
     if(!employee) throw new NotFoundException();
     return employee;
+  }
+
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  findByLocation(locationId: number){
+    
   }
 
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

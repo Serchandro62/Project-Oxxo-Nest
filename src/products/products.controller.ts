@@ -29,8 +29,8 @@ export class ProductsController {
 
   @Auth([ROLES.EMPLOYEE, ROLES.MANAGER])
   @Get('provider/:id')
-  findByProvider(@Param('id', new ParseUUIDPipe({version: '4'})) id: string) {
-    return this.productsService.findByProvider(id);
+  findByProviderId(@Param('id', new ParseUUIDPipe({version: '4'})) id: string) {
+    return this.productsService.findByProviderId(id);
   }
 
   @Auth([ROLES.EMPLOYEE, ROLES.MANAGER])

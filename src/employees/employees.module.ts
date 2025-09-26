@@ -3,6 +3,8 @@ import { EmployeesService } from './employees.service';
 import { EmployeesController } from './employees.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
+import { Location } from 'src/locations/entities/location.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Module({
   /**
@@ -10,7 +12,7 @@ import { Employee } from './entities/employee.entity';
    * Permite usar @InjectRepository(Employee) en los servicios del módulo
    * Configura la conexión con la tabla de productos en la base de datos
    */
-  imports: [TypeOrmModule.forFeature([Employee])], //Basicamente mete un repositorio del tipo indicado al contenedor para ser inyectado en el servicio. 
+  imports: [TypeOrmModule.forFeature([Employee, Location, User])], //Basicamente mete un repositorio del tipo indicado al contenedor para ser inyectado en el servicio. 
   controllers: [EmployeesController],
   providers: [EmployeesService],
 })
