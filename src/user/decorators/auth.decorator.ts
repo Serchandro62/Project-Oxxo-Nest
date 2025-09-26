@@ -2,6 +2,7 @@ import { applyDecorators, UseGuards } from "@nestjs/common";
 import { Roles } from "./roles.decorator";
 import { AuthGuard } from "../guards/auth.guard";
 import { RolesGuard } from "../guards/roles.guard";
+import { ROLES } from "../constants/roles.constants";
 
 /**
  * Creamos un decorador @Auth('algo') que:
@@ -9,8 +10,8 @@ import { RolesGuard } from "../guards/roles.guard";
  * 2.- Contendrá un 'algo' que indica qué rol se pide para acceder a algún lado. 
  * 3.- Verificará si el usuario tiene al menos un rol que se pide.
 */
-export const Auth = (roles: string[]) => {
-    roles.push('Admin') //Auth siempre estará en @Roles() para que si un usuario tiene al menos Admin, siempre puede entrar a todos
+export const Auth = (roles: ROLES[]) => {
+    roles.push(ROLES.ADMIN) //Auth siempre estará en @Roles() para que si un usuario tiene al menos Admin, siempre puede entrar a todos
     return applyDecorators(
         Roles(roles),
         UseGuards(AuthGuard,RolesGuard)
