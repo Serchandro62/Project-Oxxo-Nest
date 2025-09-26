@@ -9,11 +9,13 @@ export class Employee {
     @Column({type: "text"})
     employeeName: string;
     @Column({type: "text"})
-    lastName: string;
+    employeeLastName: string;
     @Column({type: "text"})
-    phoneNumber: string;
+    employeePhoneNumber: string;
     @Column({type:"text"})
-    photoUrl: string
+    employeePhoto: string
+    @Column({type: 'text', unique: true})
+    employeeEmail: string;
 
     @ManyToOne(()=>Location, (location)=>location.employees)
     @JoinColumn({name: 'locationId'})

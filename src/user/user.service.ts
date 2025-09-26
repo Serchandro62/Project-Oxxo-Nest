@@ -50,4 +50,15 @@ export class UserService {
     return this.jwtService.sign(payload); //haces login, te avienta un string token
   }
 
+  //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  async update(userEmail: string, updateUserDto: UpdateUserDto){
+    const userToUpdate = await this.userRepository.preload({
+      userEmail: userEmail,
+      ...updateUserDto
+    })
+    if(!userToUpdate) throw new NotFoundException();
+    return await this.userRepository.save(userToUpdate);
+  }
+
 }

@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, isString, IsUUID, MaxLength } from "class-validator";
+import { IsEmail, IsInt, IsOptional, IsString, isString, IsUUID, MaxLength } from "class-validator";
 
 //Es la plantilla de lo que debe llevar nuestras peticiones para crear un employee
 export class CreateEmployeeDto {
@@ -12,11 +12,15 @@ export class CreateEmployeeDto {
 
     @IsString()
     @MaxLength(40)
-    lastName: string;
+    employeeLastName: string;
 
     @MaxLength(10)
     @IsString()
-    phoneNumber: string;
+    employeePhoneNumber: string;
+
+    @IsEmail()
+    @MaxLength(30)
+    employeeEmail: string;
 
     
 }
