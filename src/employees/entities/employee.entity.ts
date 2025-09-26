@@ -1,5 +1,6 @@
 import { Location } from "src/locations/entities/location.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/user/entities/user.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Employee {
@@ -16,5 +17,9 @@ export class Employee {
 
     @ManyToOne(()=>Location, (location)=>location.employees)
     @JoinColumn({name: 'locationId'})
-    location: Location;
+    location: Location; 
+
+    @OneToOne(()=>User,(user)=>user.employee)
+    @JoinColumn({name: 'userId'})
+    user: User
 }

@@ -1,4 +1,5 @@
 import { Location } from "src/locations/entities/location.entity";
+import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -20,4 +21,8 @@ export class Manager {
      */
     @OneToOne(()=>Location, (location)=>location.manager) 
     location: Location
+
+    @OneToOne(()=>User, (user)=>user.manager)
+    @JoinColumn({name: 'userId'})
+    user: User
 }
