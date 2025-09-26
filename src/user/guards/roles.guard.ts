@@ -20,7 +20,7 @@ export class RolesGuard implements CanActivate {
       return this.matchRoles(roles, user.userRoles); //verifica si algún role del usuario coincide con el que se pide
     }
   }
-  matchRoles(roles: string[],userRoles: string[]){
+  matchRoles(roles: string[],userRoles: string[]){ //EL usuario tiene que contener al menos uno de los requeridos
     let access = false;
     userRoles.forEach((userRole)=>{
       if (roles.includes(userRole)) access = true;

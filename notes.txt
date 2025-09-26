@@ -21,3 +21,5 @@ más por escalabilidad que por seguridad. De hecho es más seguro stateful, pero
 
 6.- Aprendimos a usar el @Roles() que creamos, para indicar con metadata qué role requiere un endpoint. 
 6.1.- RolesGuard lee la metadata, para ver qué rol requiere. Debe ir en algo que ya haya pasado por AuthGuard.
+
+7.- Aprendimos applyDecorators que combina decoradores.

@@ -7,9 +7,9 @@ import { UserData } from 'src/user/decorators/user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { Roles } from 'src/user/decorators/roles.decorator';
 import { RolesGuard } from 'src/user/guards/roles.guard';
+import { Auth } from 'src/user/decorators/auth.decorator';
 
-@UseGuards(RolesGuard) //Este debe ir después de @AuthGuard, porque si no, no hay nada en request.user
-@UseGuards(AuthGuard) //los decoradores de leen de abajo hacia arriba. 
+
 @Controller('providers')
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
@@ -19,8 +19,8 @@ export class ProvidersController {
     return this.providersService.create(createProviderDto);
   }
 
-  @Get()
-  @Roles(['Manager']) //No imprta dónde vaya, ya que RolesGuard buscará el valor de @Roles siempre, esté arriba o abajo. 
+  @Get() 
+  @Auth(['Manager'])
   findAll(@UserData() user: User) {
     if(user.userRoles.includes("Employee")) throw new UnauthorizedException("No estás autorizado. Solo admins"); 
     return this.providersService.findAll();
