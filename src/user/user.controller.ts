@@ -4,7 +4,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Auth } from './decorators/auth.decorator';
+import { ApiAuth } from './decorators/api.decorator';
 
+@ApiAuth()
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}

@@ -4,7 +4,9 @@ import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { Auth } from 'src/user/decorators/auth.decorator';
 import { ROLES } from 'src/user/constants/roles.constants';
+import { ApiAuth } from 'src/user/decorators/api.decorator';
 
+@ApiAuth()
 @Controller('locations')
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}

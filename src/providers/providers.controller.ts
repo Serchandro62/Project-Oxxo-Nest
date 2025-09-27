@@ -9,8 +9,9 @@ import { Roles } from 'src/user/decorators/roles.decorator';
 import { RolesGuard } from 'src/user/guards/roles.guard';
 import { Auth } from 'src/user/decorators/auth.decorator';
 import { ROLES } from 'src/user/constants/roles.constants';
+import { ApiAuth } from 'src/user/decorators/api.decorator';
 
-
+@ApiAuth()
 @Controller('providers')
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}

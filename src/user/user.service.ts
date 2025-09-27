@@ -52,7 +52,7 @@ export class UserService {
       userRoles: user.userRoles
     }
     return this.jwtService.sign(payload); //haces login, te avienta un string token
-  }
+  } 
 
   //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 

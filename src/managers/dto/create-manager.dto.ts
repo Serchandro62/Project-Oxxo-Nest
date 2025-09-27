@@ -1,4 +1,4 @@
-import { IsEmail, IsNumber, IsString, MaxLength } from "class-validator";
+import { IsEmail, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 
 export class CreateManagerDto {
     @IsString()

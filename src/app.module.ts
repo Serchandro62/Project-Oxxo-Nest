@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { EmployeesModule } from './employees/employees.module';
 import { ProductsModule } from './products/products.module';
 import { ConfigModule } from '@nestjs/config'; //Permite leer variables de entorno .env y proporciona el servicio ConfigService (que provee valores por defecto, tipados, etc)
@@ -32,8 +30,6 @@ import { UserModule } from './user/user.module';
     LocationsModule,
     RegionsModule,
     UserModule
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+  ]
 })
 export class AppModule { }

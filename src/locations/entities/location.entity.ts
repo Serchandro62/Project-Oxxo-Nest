@@ -22,7 +22,7 @@ export class Location {
     @JoinColumn({name: 'managerId'})
     manager: Manager;
 
-    @ManyToOne(()=>Region, (region)=>region.locations,{eager:true})
+    @ManyToOne(()=>Region, (region)=>region.locations)
     @JoinColumn({name: 'regionId'})
     region: Region;
 
