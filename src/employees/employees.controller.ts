@@ -5,12 +5,12 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Auth } from 'src/user/decorators/auth.decorator';
 import { ROLES } from 'src/user/constants/roles.constants';
-import { get } from 'http';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Employee } from './entities/employee.entity';
 import { ApiAuth } from 'src/user/decorators/api.decorator';
 
 @ApiAuth()
+@ApiTags('Employees')
 @Controller('employees')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) { }
@@ -29,7 +29,7 @@ export class EmployeesController {
   @Auth([ROLES.MANAGER])
   @ApiResponse({
     status: 201,
-    example:{
+    example:{  
       employeeId: "UUID",
       employeeName: "Serch",
       employeeLastName: "Arte",
@@ -46,6 +46,17 @@ export class EmployeesController {
 
   @Auth([ROLES.MANAGER])
   @Get()
+  @Auth([ROLES.MANAGER])
+  @ApiResponse({
+    status: 201,
+    example:{  
+      employeeId: "UUID",
+      employeeName: "Serch",
+      employeeLastName: "Arte",
+      employeePhoneNumber: "4425039283",
+      employeeEmail: "sear@gmail.com"
+    } as Employee
+  })
   findAll() {
     return this.employeesService.findAll();
   }
@@ -54,6 +65,17 @@ export class EmployeesController {
 
   @Auth([ROLES.MANAGER])
   @Get(':id')
+  @Auth([ROLES.MANAGER])
+  @ApiResponse({
+    status: 201,
+    example:{  
+      employeeId: "UUID",
+      employeeName: "Serch",
+      employeeLastName: "Arte",
+      employeePhoneNumber: "4425039283",
+      employeeEmail: "sear@gmail.com"
+    } as Employee
+  })
   findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.employeesService.findOne(id);
   }
@@ -62,6 +84,17 @@ export class EmployeesController {
 
   @Auth([ROLES.MANAGER])
   @Get('/location/:id')
+  @Auth([ROLES.MANAGER])
+  @ApiResponse({
+    status: 201,
+    example:{  
+      employeeId: "UUID",
+      employeeName: "Serch",
+      employeeLastName: "Arte",
+      employeePhoneNumber: "4425039283",
+      employeeEmail: "sear@gmail.com"
+    } as Employee
+  })
   findByLocation(@Param ('id') locationId: string){
     return this.employeesService.findByLocation(+locationId);
   }
@@ -70,6 +103,17 @@ export class EmployeesController {
 
   @Auth([ROLES.MANAGER, ROLES.MANAGER])
   @Patch(':id')
+  @Auth([ROLES.MANAGER])
+  @ApiResponse({
+    status: 201,
+    example:{  
+      employeeId: "UUID",
+      employeeName: "Serch",
+      employeeLastName: "Arte",
+      employeePhoneNumber: "4425039283",
+      employeeEmail: "sear@gmail.com"
+    } as Employee
+  })
   update(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
     return this.employeesService.update(id, updateEmployeeDto);
   }
@@ -78,6 +122,7 @@ export class EmployeesController {
 
   @Auth([ROLES.MANAGER])
   @Delete(':id')
+  @Auth([ROLES.MANAGER])
   remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.employeesService.remove(id);
   }

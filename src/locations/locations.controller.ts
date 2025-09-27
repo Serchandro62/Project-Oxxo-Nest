@@ -5,32 +5,71 @@ import { UpdateLocationDto } from './dto/update-location.dto';
 import { Auth } from 'src/user/decorators/auth.decorator';
 import { ROLES } from 'src/user/constants/roles.constants';
 import { ApiAuth } from 'src/user/decorators/api.decorator';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Location } from './entities/location.entity';
 
 @ApiAuth()
+@ApiTags('Locations')
 @Controller('locations')
 export class LocationsController {
-  constructor(private readonly locationsService: LocationsService) {}
+  constructor(private readonly locationsService: LocationsService) { }
 
   @Auth([])
   @Post()
+  @ApiResponse({
+    status: 201,
+    example: {
+      locationId: 12,
+      locationName: "Zona Norte",
+      locationAddress: "Av. Mirador de San Juan s/n 76201",
+      locationCoords: "12,12"
+    } as Location
+  })
   create(@Body() createLocationDto: CreateLocationDto) {
     return this.locationsService.create(createLocationDto);
   }
 
   @Auth([ROLES.EMPLOYEE, ROLES.MANAGER])
   @Get()
+  @ApiResponse({
+    status: 201,
+    example: {
+      locationId: 12,
+      locationName: "Zona Norte",
+      locationAddress: "Av. Mirador de San Juan s/n 76201",
+      locationCoords: "12,12"
+    } as Location
+  })
   findAll() {
     return this.locationsService.findAll();
   }
 
   @Auth([ROLES.EMPLOYEE, ROLES.MANAGER])
   @Get(':id')
+  @ApiResponse({
+    status: 201,
+    example: {
+      locationId: 12,
+      locationName: "Zona Norte",
+      locationAddress: "Av. Mirador de San Juan s/n 76201",
+      locationCoords: "12,12"
+    } as Location
+  })
   findOne(@Param('id') id: string) {
     return this.locationsService.findOne(+id);
   }
 
   @Auth([])
   @Patch(':id')
+  @ApiResponse({
+    status: 201,
+    example: {
+      locationId: 12,
+      locationName: "Zona Norte",
+      locationAddress: "Av. Mirador de San Juan s/n 76201",
+      locationCoords: "12,12"
+    } as Location
+  })
   update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto) {
     return this.locationsService.update(+id, updateLocationDto);
   }
